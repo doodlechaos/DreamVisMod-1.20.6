@@ -5,20 +5,16 @@ import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
-import net.minecraft.server.MinecraftServer;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-
-import static net.doodlechaos.dreamvis.DreamVis.LOGGER;
 
 @Mixin(GameRenderer.class)
 public class GameRendererMixin {
-    @Inject(method = "Lnet/minecraft/client/render/GameRenderer;renderWorld(FJ)V",
+    @Inject(method = "renderWorld(FJ)V",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/client/render/WorldRenderer;setupFrustum(Lnet/minecraft/util/math/Vec3d;Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;)V"),
             locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
@@ -37,8 +33,5 @@ public class GameRendererMixin {
 
         // Apply pitch and yaw rotations
         matrix4f2.rotateX(pitchRadians).rotateY(yawRadians);
-
-        LOGGER.info("Success inside render world mixin: " + DreamVis.RollDegrees + " radiansZ: " + rollRadians);
-
     }
 }

@@ -33,35 +33,46 @@ public class SocketServer extends Thread {
                      BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                      PrintWriter out = new PrintWriter(new OutputStreamWriter(clientSocket.getOutputStream()), true)) {
 
-                    String command = in.readLine();
-                    System.out.println("Received command: " + command);
+                    String command;
+                    while ((command = in.readLine()) != null) {
+                        System.out.println("Received command: " + command);
 
-                    CountDownLatch latch = new CountDownLatch(1);
-
-                    // Execute the command on the Minecraft server
-                    minecraftServer.execute(() -> {
-                        CommandDispatcher<ServerCommandSource> dispatcher = minecraftServer.getCommandManager().getDispatcher();
-                        var parsedCommand = dispatcher.parse(command, minecraftServer.getCommandSource());
-                        try {
-                            dispatcher.execute(parsedCommand);
-                        } catch(CommandSyntaxException e){
-                            LOGGER.error(e.toString());
-                        }finally {
-                            // Count down the latch to indicate that the command execution is complete
-                            latch.countDown();
+                        if (command == null) {
+                            out.println("Command is null. Skipping.");
+                            continue;
                         }
-                    });
-                    //TODO: How can I wait until the command is finished executing before sending the websocket response?
 
-                    latch.await();
+                        // Create a final variable for use in the lambda expression
+                        final String finalCommand = command;
+                        CountDownLatch latch = new CountDownLatch(1);
 
-                    out.println("Command executed: " + command);
+                        // Execute the command on the Minecraft server
+                        minecraftServer.execute(() -> {
+                            try {
+                                CommandDispatcher<ServerCommandSource> dispatcher = minecraftServer.getCommandManager().getDispatcher();
+                                var parsedCommand = dispatcher.parse(finalCommand, minecraftServer.getCommandSource());
+                                dispatcher.execute(parsedCommand);
+                            } catch (CommandSyntaxException e) {
+                                LOGGER.error("Failed to execute command [" + finalCommand + "]" + e.toString());
+                            } finally {
+                                // Count down the latch to indicate that the command execution is complete
+                                latch.countDown();
+                                LOGGER.info("Latch counted down for command: " + finalCommand);
+                            }
+                        });
+
+                        latch.await();
+
+                        out.println("Command executed: " + finalCommand);
+                    }
 
                 } catch (Exception e) {
+                    LOGGER.error("Failed while reading the incoming command and trying to execute it: " + e.toString());
                     e.printStackTrace();
                 }
             }
         } catch (Exception e) {
+            LOGGER.error("Failed to start socket server: " + e.toString());
             e.printStackTrace();
         }
     }
