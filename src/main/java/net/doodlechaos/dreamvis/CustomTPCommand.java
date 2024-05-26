@@ -36,10 +36,6 @@ public class CustomTPCommand {
                                                                         float zrot = FloatArgumentType.getFloat(context, "zrot");
 
                                                                         player.teleport(source.getWorld(), xpos, ypos, zpos, yrot, xrot);
-                                                                        player.setYaw(yrot);
-                                                                        player.setPitch(xrot);
-                                                                        player.setHeadYaw(yrot);
-                                                                        player.setBodyYaw(yrot);
 
                                                                         RollDegrees = zrot;
 
