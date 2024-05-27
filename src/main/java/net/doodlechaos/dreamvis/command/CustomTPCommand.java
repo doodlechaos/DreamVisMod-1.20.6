@@ -1,14 +1,10 @@
-package net.doodlechaos.dreamvis;
+package net.doodlechaos.dreamvis.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.Vec3d;
 //import net.minecraft.util.math.Vec3f;
-
-import java.util.function.Supplier;
 
 import static net.doodlechaos.dreamvis.DreamVis.LOGGER;
 import static net.doodlechaos.dreamvis.DreamVis.RollDegrees;

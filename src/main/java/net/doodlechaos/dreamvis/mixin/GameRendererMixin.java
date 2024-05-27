@@ -29,7 +29,7 @@ public class GameRendererMixin {
         matrix4f2.identity();
 
         // Apply roll rotation first to ensure it's in the camera's local coordinate space
-        matrix4f2.rotateZ(rollRadians);
+        matrix4f2.rotateZ(-rollRadians);
 
         // Apply pitch and yaw rotations
         matrix4f2.rotateX(pitchRadians).rotateY(yawRadians);

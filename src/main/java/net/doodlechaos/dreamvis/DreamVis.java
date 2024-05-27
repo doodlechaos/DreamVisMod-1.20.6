@@ -1,5 +1,6 @@
 package net.doodlechaos.dreamvis;
 
+import net.doodlechaos.dreamvis.command.CustomTPCommand;
 import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
