@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(GameRenderer.class)
@@ -33,5 +34,10 @@ public class GameRendererMixin {
 
         // Apply pitch and yaw rotations
         matrix4f2.rotateX(pitchRadians).rotateY(yawRadians);
+    }
+
+    @Inject(at = @At("TAIL"), method = "getFov", cancellable = true)
+    private void getFov(Camera camera, float tickDelta, boolean changingFov, CallbackInfoReturnable<Double> cir) {
+        cir.setReturnValue(DreamVis.MyFOV);
     }
 }

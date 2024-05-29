@@ -22,32 +22,45 @@ public class ScreenshotCommand {
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(literal("screenshot")
+                .executes(ctx -> {
+                    // Handle the case where frameNumber is not provided
+                    boolean success = TakeScreenshot(0);
+                    if(success)
+                        return 1;
+                    return 0;
+                })
                 .then(argument("frameNumber", IntegerArgumentType.integer())
                         .executes(ctx -> {
-
                             int frameNum = IntegerArgumentType.getInteger(ctx, "frameNumber");
-                            String paddedFrameNum = String.format("%06d", frameNum); // Pad frameNum with leading zeros
-
-                            Path directoryPath = Paths.get(MyConfig.DirectoryPath);
-
-                            // Create the necessary folders if they don't exist
-                            if (!Files.exists(directoryPath)) {
-                                try {
-                                    Files.createDirectories(directoryPath);
-                                } catch (IOException e) {
-                                    LOGGER.error("Failed to create directory: " + directoryPath, e);
-                                    return 0;
-                                }
-                            }
-
-                            try{
-                                File screenshotFile = directoryPath.resolve("frame_" + paddedFrameNum + ".png").toFile();
-                                ScreenshotRecorder.saveScreenshot(screenshotFile.getParentFile(), screenshotFile.getName(), MinecraftClient.getInstance().getFramebuffer(), simpleLogConsumer);
-                            }catch (Exception e){
-                                LOGGER.error(e.toString());
-                            }
-                            return 1;
+                           if(TakeScreenshot(frameNum)){
+                               return 1;
+                           }
+                            return 0;
                         })));
+    }
+
+    public static boolean TakeScreenshot(int frameNum) {
+        String paddedFrameNum = String.format("%06d", frameNum); // Pad frameNum with leading zeros
+        Path directoryPath = Paths.get(MyConfig.DirectoryPath);
+
+        // Create the necessary folders if they don't exist
+        if (!Files.exists(directoryPath)) {
+            try {
+                Files.createDirectories(directoryPath);
+            } catch (IOException e) {
+                LOGGER.error("Failed to create directory: " + directoryPath, e);
+                return false;
+            }
+        }
+
+        try {
+            File screenshotFile = directoryPath.resolve("frame_" + paddedFrameNum + ".png").toFile();
+            ScreenshotRecorder.saveScreenshot(screenshotFile.getParentFile(), screenshotFile.getName(), MinecraftClient.getInstance().getFramebuffer(), simpleLogConsumer);
+        } catch (Exception e) {
+            LOGGER.error(e.toString());
+            return false;
+        }
+        return true;
     }
 
     public static Consumer<Text> simpleLogConsumer = value -> {

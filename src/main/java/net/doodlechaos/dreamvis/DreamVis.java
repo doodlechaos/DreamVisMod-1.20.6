@@ -18,6 +18,7 @@ public class DreamVis implements ModInitializer {
 	public static boolean HUD_HIDDEN = false;
 
 	public static float RollDegrees = 0;
+	public static double MyFOV = 70;
 
 	@Override
 	public void onInitialize() {
@@ -37,6 +38,7 @@ public class DreamVis implements ModInitializer {
 			ScreenshotCommand.register(dispatcher);
 			SetProjectDirectoryCommand.register(dispatcher);
 			SetProjectNameCommand.register(dispatcher);
+			FOVCommand.register(dispatcher);
 		});
 	}
 
