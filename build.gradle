@@ -30,7 +30,10 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	
+
+	// Added by mark
+	implementation 'org.java-websocket:Java-WebSocket:1.5.6'
+
 }
 
 processResources {

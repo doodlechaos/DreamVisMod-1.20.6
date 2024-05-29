@@ -1,7 +1,9 @@
 package net.doodlechaos.dreamvis.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import net.doodlechaos.dreamvis.DreamVis;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
@@ -13,13 +15,17 @@ public class SocketCommand {
 
     public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(literal("socket")
-                .executes(ctx -> {
-                    // If no argument is provided, print the current directoryPath
-                    ServerCommandSource source = ctx.getSource();
-                    source.sendFeedback(() -> Text.literal("TODO: Restarting socket: "), false);
+                .then(argument("msg", StringArgumentType.greedyString())
+                        .executes(ctx -> {
+
+                            String msg = StringArgumentType.getString(ctx, "msg");
+                            DreamVis.SocketHub.SendMsgToUnity(msg);
+
+                            ServerCommandSource source = ctx.getSource();
+                            source.sendFeedback(() -> Text.literal("sending message to Unity: " + msg), false);
 
                     return 1;
-                }));
+                })));
     }
 
 }
