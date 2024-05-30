@@ -1,19 +1,32 @@
 package net.doodlechaos.dreamvis.networking;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.ParseResults;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.integrated.IntegratedServer;
+import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
+import net.minecraft.util.math.Vec2f;
+import org.java_websocket.WebSocket;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
+import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.UUID;
+import java.util.Vector;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import static net.doodlechaos.dreamvis.DreamVis.*;
 
@@ -21,6 +34,8 @@ public class SocketHub {
 
     private static MyWebSocketClient _myWsClient;
     private static MyWebSocketServer _myWsServer;
+
+    public CountDownLatch CountDownLatch;
 
     public SocketHub(){
 
@@ -61,8 +76,6 @@ public class SocketHub {
                     LOGGER.error("Client failed to connect on URI: " + uri.toString());
                 }
 
-                //_myWsClient.send("message from inside another thread");
-
             } catch (URISyntaxException e) {
                 LOGGER.error("URI Syntax Error: " + e.getMessage());
             } catch (InterruptedException e) {
@@ -75,25 +88,30 @@ public class SocketHub {
         }).start();
     }
 
-    public void OnUnityMessageReceived(String msg){
+    public void OnUnityMessageReceived(WebSocket conn, String msg){
         LOGGER.info("RECEIVED MESSAGE FROM UNITY: " + msg);
-
-        ExecuteCommandAsPlayer(msg);
+        ExecuteCommandAsPlayer(conn, msg);
     }
 
+
     //TODO: move this to somewhere else?
-    private void ExecuteCommandAsPlayer(String command){
+    private void ExecuteCommandAsPlayer(WebSocket conn, String command){
         IntegratedServer minecraftServer = MinecraftClient.getInstance().getServer();
         List<ServerPlayerEntity> playerList = minecraftServer.getPlayerManager().getPlayerList();
-        if (playerList.isEmpty())
+        if (playerList.isEmpty()){
+            LOGGER.error("Player list is empty");
+            conn.send("Player list is empty"); //Ack
             return;
+        }
 
         ServerPlayerEntity player = minecraftServer.getPlayerManager().getPlayerList().get(0);
 
         if (minecraftServer == null) {
             LOGGER.error("Minecraft server is not available.");
+            conn.send("Minecraft server is not available."); //Ack
             return;
         }
+        CountDownLatch = new CountDownLatch(5);
 
         minecraftServer.execute(() -> {
             try {
@@ -102,34 +120,30 @@ public class SocketHub {
                     LOGGER.error("No players are currently online.");
                     return;
                 }
-
+                // Set up a CountDownLatch to wait for the command completion
                 CommandDispatcher<ServerCommandSource> dispatcher = minecraftServer.getCommandManager().getDispatcher();
-                ServerCommandSource playerCommandSource = player.getCommandSource();
 
-                var parsedCommand = dispatcher.parse(command, playerCommandSource);
+                var parsedCommand = dispatcher.parse(command, player.getCommandSource());
+
                 dispatcher.execute(parsedCommand);
-            } catch (CommandSyntaxException e) {
+
+                LOGGER.info("Command executed successfully");
+
+            } catch (Exception e) {
                 LOGGER.error("Failed to execute command [" + command + "]: " + e.toString());
             }
         });
-    }
 
-    private void ExecuteCommandAsServer(String command){
-        IntegratedServer minecraftServer = MinecraftClient.getInstance().getServer();
-        // Execute the command on the Minecraft server
-        minecraftServer.execute(() -> {
-            try {
-                CommandDispatcher<ServerCommandSource> dispatcher = minecraftServer.getCommandManager().getDispatcher();
-                var parsedCommand = dispatcher.parse(command, minecraftServer.getCommandSource());
-                dispatcher.execute(parsedCommand);
-            } catch (CommandSyntaxException e) {
-                LOGGER.error("Failed to execute command [" + command + "]" + e.toString());
-            } finally {
-                // Count down the latch to indicate that the command execution is complete
-                //latch.countDown();
-                LOGGER.info("Latch counted down for command: " + command);
-            }
-        });
+
+        //TODO: Wait for CountDownLatch, or timeout after 10 seconds
+        try{
+            boolean completed = CountDownLatch.await(10, TimeUnit.SECONDS);
+            conn.send("Latch completed"); //Ack
+
+        } catch (Exception e){
+            conn.send("Time out"); //Ack
+        }
+
     }
 
     public void SendMsgToUnity(String msg){

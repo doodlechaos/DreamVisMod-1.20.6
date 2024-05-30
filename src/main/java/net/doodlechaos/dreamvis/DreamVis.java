@@ -8,7 +8,14 @@ import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
+import net.minecraft.network.message.MessageType;
+import net.minecraft.network.message.SignedMessage;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +59,39 @@ public class DreamVis implements ModInitializer {
 	private void RegisterEvents(){
 		ServerLifecycleEvents.SERVER_STARTED.register(this::onServerStarted);
 		ServerLifecycleEvents.SERVER_STOPPED.register(this::onServerStopped);
+		ServerMessageEvents.CHAT_MESSAGE.register(this::onChatMessage);
+		ServerMessageEvents.COMMAND_MESSAGE.register(this::onCommandMessage);
+		ServerTickEvents.END_WORLD_TICK.register(this::onEndWorldTick);
+		ServerTickEvents.END_SERVER_TICK.register(this::onEndServerTick);
+	}
+
+	private void onEndServerTick(MinecraftServer minecraftServer) {
+		//LOGGER.info("server tick. Task count: " + minecraftServer.getTaskCount());
+
+//		if(SocketHub.CountDownLatch == null)
+	//		return;
+		//SocketHub.CountDownLatch.countDown();
+	}
+
+	private void onEndWorldTick(ServerWorld serverWorld) {
+		//LOGGER.info("world tick");
+	}
+
+	private void onChatMessage(SignedMessage signedMessage, ServerPlayerEntity serverPlayerEntity, MessageType.Parameters parameters) {
+		String msg = signedMessage.getContent().getString();
+		LOGGER.info("on chat message: " + msg);
+		CheckForDoneSignal(msg);
+	}
+	private void onCommandMessage(SignedMessage signedMessage, ServerCommandSource serverCommandSource, MessageType.Parameters parameters) {
+		String msg = signedMessage.getContent().getString();
+		LOGGER.info("on command message: " + msg);
+		CheckForDoneSignal(msg);
+	}
+
+	private void CheckForDoneSignal(String mcChatMsg){
+		//if(mcChatMsg.equals("DONE")){
+		//	SocketHub.SendMsgToUnity(mcChatMsg);
+		//}
 	}
 
 	private void onServerStarted(MinecraftServer server) {

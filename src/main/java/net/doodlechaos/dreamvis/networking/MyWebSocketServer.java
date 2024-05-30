@@ -45,21 +45,24 @@ public class MyWebSocketServer extends WebSocketServer {
     @Override
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
         broadcast(conn + " has left the room!");
-       LOGGER.info(conn + " has left the room!");
+        LOGGER.info(conn + " has left the room!");
     }
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        broadcast(message);
-        LOGGER.info(conn + ": " + message);
-        _parentHub.OnUnityMessageReceived(message);
+        handleOnMessage(conn, message);
+///       broadcast(message);
     }
 
     @Override
     public void onMessage(WebSocket conn, ByteBuffer message) {
-        broadcast(message.array());
+        handleOnMessage(conn, message.toString());
+    }
+
+    private void handleOnMessage(WebSocket conn, String message){
+        //broadcast(message);
         LOGGER.info(conn + ": " + message);
-        _parentHub.OnUnityMessageReceived(message.toString());
+        _parentHub.OnUnityMessageReceived(conn, message);
     }
 
 
