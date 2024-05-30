@@ -16,7 +16,7 @@ public class DreamVis implements ModInitializer {
 	public static final String MOD_ID = "dreamvis";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 	public static final int SOCKET_SERVER_PORT = 12345; // Change this to your desired port
-	public static final int SOCKET_CLIENT_PORT = 42069; // Change this to your desired port
+	public static final int SOCKET_CLIENT_PORT = 54321; // Change this to your desired port
 	public static final String UNITY_ROUTE_NAME = "doodle";
 
 	public static boolean HUD_HIDDEN = false;
