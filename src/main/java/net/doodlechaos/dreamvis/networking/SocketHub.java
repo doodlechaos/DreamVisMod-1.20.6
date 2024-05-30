@@ -88,14 +88,14 @@ public class SocketHub {
         }).start();
     }
 
-    public void OnUnityMessageReceived(WebSocket conn, String msg){
+    public void OnUnityMessageReceived(WebSocket conn, String msg, boolean blocking){
         LOGGER.info("RECEIVED MESSAGE FROM UNITY: " + msg);
-        ExecuteCommandAsPlayer(conn, msg);
+        ExecuteCommandAsPlayer(conn, msg, blocking);
     }
 
 
     //TODO: move this to somewhere else?
-    private void ExecuteCommandAsPlayer(WebSocket conn, String command){
+    private void ExecuteCommandAsPlayer(WebSocket conn, String command, boolean blocking){
         IntegratedServer minecraftServer = MinecraftClient.getInstance().getServer();
         List<ServerPlayerEntity> playerList = minecraftServer.getPlayerManager().getPlayerList();
         if (playerList.isEmpty()){
@@ -118,6 +118,7 @@ public class SocketHub {
                 // Get the nearest player to the server's default position
                 if (player == null) {
                     LOGGER.error("No players are currently online.");
+                    conn.send("No players are currently online."); //Ack
                     return;
                 }
                 // Set up a CountDownLatch to wait for the command completion
@@ -134,15 +135,19 @@ public class SocketHub {
             }
         });
 
-
         //TODO: Wait for CountDownLatch, or timeout after 10 seconds
-        try{
-            boolean completed = CountDownLatch.await(10, TimeUnit.SECONDS);
-            conn.send("Latch completed"); //Ack
+        if(blocking){
+            try{
+                boolean completed = CountDownLatch.await(10, TimeUnit.SECONDS);
+                conn.send("Latch completed"); //Ack
 
-        } catch (Exception e){
-            conn.send("Time out"); //Ack
+            } catch (Exception e){
+                conn.send("Time out"); //Ack
+            }
+        } else{
+            conn.send("Ack non-blocking command");
         }
+
 
     }
 

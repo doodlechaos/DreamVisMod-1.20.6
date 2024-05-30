@@ -61,8 +61,14 @@ public class MyWebSocketServer extends WebSocketServer {
 
     private void handleOnMessage(WebSocket conn, String message){
         //broadcast(message);
+        boolean blocking = false;
+        if(message.startsWith("b|")) {
+            blocking = true;
+            message = message.substring(2);
+        }
+
         LOGGER.info(conn + ": " + message);
-        _parentHub.OnUnityMessageReceived(conn, message);
+        _parentHub.OnUnityMessageReceived(conn, message, blocking);
     }
 
 
