@@ -90,7 +90,7 @@ public class KeyboardInputs {
                 pWasPressed = true;
             }
         } else {
-            pWasPressed = false;
+            pWasPressed = false;;
         }
 
         // Continuous detection for other keys
