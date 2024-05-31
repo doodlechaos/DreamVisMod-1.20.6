@@ -7,8 +7,7 @@
 		"GameRendererMixin",
 		"hud.ChatHudMixin",
 		"hud.InGameHudMixin",
-		"hud.InventoryScreenMixin",
-		"MinecraftClientMixin"
+		"hud.InventoryScreenMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

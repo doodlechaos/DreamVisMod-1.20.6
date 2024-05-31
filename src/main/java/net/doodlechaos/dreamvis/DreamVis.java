@@ -2,20 +2,20 @@ package net.doodlechaos.dreamvis;
 
 import net.doodlechaos.dreamvis.command.*;
 import net.doodlechaos.dreamvis.config.MyConfig;
-import net.doodlechaos.dreamvis.networking.MyWebSocketServer;
 import net.doodlechaos.dreamvis.networking.SocketHub;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.message.v1.ServerMessageEvents;
-import net.minecraft.network.message.MessageType;
-import net.minecraft.network.message.SignedMessage;
+
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
+
+import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,13 +32,26 @@ public class DreamVis implements ModInitializer {
 	public static double MyFOV = 70;
 
 	public static SocketHub SocketHub;
+	public static KeyboardInputs KeyboardInputs;
+
+	//private static KeyBinding KkeyBinding;
+	//private static boolean KwasPressed = false;
 
 	@Override
 	public void onInitialize() {
 		LOGGER.info("Hello Fabric world!");
 		MyConfig.LoadFromFile();
 
+		// Create the key binding
+/*		KkeyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+				"key.mymod.k", // The translation key of the keybinding's name
+				InputUtil.Type.KEYSYM, // The type of the keybinding, KEYSYM for keyboard
+				GLFW.GLFW_KEY_K, // The keycode of the key
+				"category.mymod.test" // The translation key of the keybinding's category
+		));*/
+		// Register the client tick event to check the key press
 
+		KeyboardInputs = new KeyboardInputs();
 		RegisterCommands();
 		RegisterEvents();
 	}
@@ -59,48 +72,36 @@ public class DreamVis implements ModInitializer {
 	private void RegisterEvents(){
 		ServerLifecycleEvents.SERVER_STARTED.register(this::onServerStarted);
 		ServerLifecycleEvents.SERVER_STOPPED.register(this::onServerStopped);
-		ServerMessageEvents.CHAT_MESSAGE.register(this::onChatMessage);
-		ServerMessageEvents.COMMAND_MESSAGE.register(this::onCommandMessage);
-		ServerTickEvents.END_WORLD_TICK.register(this::onEndWorldTick);
-		ServerTickEvents.END_SERVER_TICK.register(this::onEndServerTick);
+		ClientTickEvents.END_CLIENT_TICK.register(this::onEndClientTick);
+/*		ClientTickEvents.END_CLIENT_TICK.register(client -> {
+			if (KkeyBinding.isPressed()) {
+				if (!KwasPressed) {
+					onKKeyPress();
+					KwasPressed = true;
+				}
+			} else {
+				KwasPressed = false;
+			}
+		});*/
 	}
 
-	private void onEndServerTick(MinecraftServer minecraftServer) {
-		//LOGGER.info("server tick. Task count: " + minecraftServer.getTaskCount());
+/*	private void onKKeyPress() {
+		LOGGER.info("K KEY DETECTED");
+		SocketHub.SendMsgToUnity("KEYPRESS=k");
+	}*/
 
-//		if(SocketHub.CountDownLatch == null)
-	//		return;
-		//SocketHub.CountDownLatch.countDown();
-	}
-
-	private void onEndWorldTick(ServerWorld serverWorld) {
-		//LOGGER.info("world tick");
-	}
-
-	private void onChatMessage(SignedMessage signedMessage, ServerPlayerEntity serverPlayerEntity, MessageType.Parameters parameters) {
-		String msg = signedMessage.getContent().getString();
-		LOGGER.info("on chat message: " + msg);
-		CheckForDoneSignal(msg);
-	}
-	private void onCommandMessage(SignedMessage signedMessage, ServerCommandSource serverCommandSource, MessageType.Parameters parameters) {
-		String msg = signedMessage.getContent().getString();
-		LOGGER.info("on command message: " + msg);
-		CheckForDoneSignal(msg);
-	}
-
-	private void CheckForDoneSignal(String mcChatMsg){
-		//if(mcChatMsg.equals("DONE")){
-		//	SocketHub.SendMsgToUnity(mcChatMsg);
-		//}
+	private void onEndClientTick(MinecraftClient minecraftClient) {
+		if(SocketHub == null || SocketHub.CountDownLatch == null)
+			return;
+		SocketHub.CountDownLatch.countDown();
 	}
 
 	private void onServerStarted(MinecraftServer server) {
-
 		SocketHub = new SocketHub();
-
 	}
 
 	private void onServerStopped(MinecraftServer server){
 		MyConfig.SaveToFile();
 	}
+
 }
