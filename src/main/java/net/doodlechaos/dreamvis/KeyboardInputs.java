@@ -5,10 +5,16 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.GameMode;
 import org.lwjgl.glfw.GLFW;
 
-import static net.doodlechaos.dreamvis.DreamVis.LOGGER;
-import static net.doodlechaos.dreamvis.DreamVis.SocketHub;
+import java.text.MessageFormat;
+
+import static net.doodlechaos.dreamvis.DreamVis.*;
 
 public class KeyboardInputs {
 
@@ -21,7 +27,6 @@ public class KeyboardInputs {
     private boolean kWasPressed = false;
     private boolean cWasPressed = false;
     private boolean pWasPressed = false;
-
 
     public KeyboardInputs(){
         RegisterKeyBindings();
@@ -104,7 +109,10 @@ public class KeyboardInputs {
     }
     private void onKKeyPress() {
         LOGGER.info("K KEY DETECTED");
-        SocketHub.SendMsgToUnity("KEYPRESS=k");
+        Vec3d playerPos = getPlayerPos();
+        Vec3d playerRot = getPlayerEulerAngles();
+        String message = MessageFormat.format("KEYPRESS=k {0} {1} {2} {3} {4} {5}", playerPos.x, playerPos.y, playerPos.z, playerRot.x, playerRot.y, playerRot.z);
+        SocketHub.SendMsgToUnity(message);
     }
 
     private void onLeftKeyPress() {
@@ -119,11 +127,49 @@ public class KeyboardInputs {
 
     private void onCKeyPress() {
         LOGGER.info("C KEY DETECTED");
-        SocketHub.SendMsgToUnity("KEYPRESS=c");
+        var playerList = MinecraftClient.getInstance().getServer().getPlayerManager().getPlayerList();
+
+        var player = playerList.getFirst();
+
+        if(player == null)
+            return;
+
+        int nextOrdinal = (CurrCamMode.ordinal() + 1) % CurrCamMode.values().length;
+        CurrCamMode = CurrCamMode.values()[nextOrdinal];
+
+        if(CurrCamMode == CamMode.UnityKeyframes){
+            player.changeGameMode(GameMode.CREATIVE);
+
+            // Enable flying
+            player.getAbilities().flying = true;
+            player.getAbilities().allowFlying = true;
+            player.sendAbilitiesUpdate();
+        }
+
+        MinecraftClient.getInstance().player.sendMessage(Text.literal("Camera mode set to: " + CurrCamMode), false);
     }
 
     private void onPKeyPress() {
         LOGGER.info("P KEY DETECTED");
         SocketHub.SendMsgToUnity("KEYPRESS=p");
+    }
+
+    private Vec3d getPlayerPos(){
+        MinecraftClient client = MinecraftClient.getInstance();
+        if(client.player == null)
+            return Vec3d.ZERO;
+
+        return MinecraftClient.getInstance().player.getPos();
+    }
+
+    private Vec3d getPlayerEulerAngles(){
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player == null)
+            return Vec3d.ZERO;
+
+        float pitch = client.player.getPitch(); // Rotation around the x-axis
+        float yaw = client.player.getYaw(); // Rotation around the y-axis
+        float roll = DreamVis.RollDegrees; // Rotation around the z-axis, typically not used in Minecraft
+        return new Vec3d(pitch, yaw, roll);
     }
 }

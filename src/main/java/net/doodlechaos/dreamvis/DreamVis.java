@@ -6,16 +6,12 @@ import net.doodlechaos.dreamvis.networking.SocketHub;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
 import net.minecraft.server.MinecraftServer;
 
-import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,22 +30,14 @@ public class DreamVis implements ModInitializer {
 	public static SocketHub SocketHub;
 	public static KeyboardInputs KeyboardInputs;
 
-	//private static KeyBinding KkeyBinding;
-	//private static boolean KwasPressed = false;
+	public enum CamMode {UnityKeyframes, MCRegular}
+	public static CamMode CurrCamMode = CamMode.MCRegular;
+
 
 	@Override
 	public void onInitialize() {
 		LOGGER.info("Hello Fabric world!");
 		MyConfig.LoadFromFile();
-
-		// Create the key binding
-/*		KkeyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-				"key.mymod.k", // The translation key of the keybinding's name
-				InputUtil.Type.KEYSYM, // The type of the keybinding, KEYSYM for keyboard
-				GLFW.GLFW_KEY_K, // The keycode of the key
-				"category.mymod.test" // The translation key of the keybinding's category
-		));*/
-		// Register the client tick event to check the key press
 
 		KeyboardInputs = new KeyboardInputs();
 		RegisterCommands();
@@ -73,22 +61,8 @@ public class DreamVis implements ModInitializer {
 		ServerLifecycleEvents.SERVER_STARTED.register(this::onServerStarted);
 		ServerLifecycleEvents.SERVER_STOPPED.register(this::onServerStopped);
 		ClientTickEvents.END_CLIENT_TICK.register(this::onEndClientTick);
-/*		ClientTickEvents.END_CLIENT_TICK.register(client -> {
-			if (KkeyBinding.isPressed()) {
-				if (!KwasPressed) {
-					onKKeyPress();
-					KwasPressed = true;
-				}
-			} else {
-				KwasPressed = false;
-			}
-		});*/
 	}
 
-/*	private void onKKeyPress() {
-		LOGGER.info("K KEY DETECTED");
-		SocketHub.SendMsgToUnity("KEYPRESS=k");
-	}*/
 
 	private void onEndClientTick(MinecraftClient minecraftClient) {
 		if(SocketHub == null || SocketHub.CountDownLatch == null)

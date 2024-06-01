@@ -90,6 +90,9 @@ public class SocketHub {
 
     public void OnUnityMessageReceived(WebSocket conn, String msg, boolean blocking){
         LOGGER.info("RECEIVED MESSAGE FROM UNITY: " + msg);
+        if(CurrCamMode == CamMode.MCRegular && msg.startsWith("ctp"))
+            return;
+
         ExecuteCommandAsPlayer(conn, msg, blocking);
     }
 
