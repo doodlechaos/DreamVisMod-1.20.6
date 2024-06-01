@@ -138,7 +138,7 @@ public class KeyboardInputs {
         CurrCamMode = CurrCamMode.values()[nextOrdinal];
 
         if(CurrCamMode == CamMode.UnityKeyframes){
-            player.changeGameMode(GameMode.CREATIVE);
+            player.changeGameMode(GameMode.SPECTATOR);
 
             // Enable flying
             player.getAbilities().flying = true;

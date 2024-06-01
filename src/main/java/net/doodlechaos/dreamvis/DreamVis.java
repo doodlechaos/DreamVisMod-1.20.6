@@ -42,6 +42,7 @@ public class DreamVis implements ModInitializer {
 		KeyboardInputs = new KeyboardInputs();
 		RegisterCommands();
 		RegisterEvents();
+
 	}
 
 	private void RegisterCommands(){
