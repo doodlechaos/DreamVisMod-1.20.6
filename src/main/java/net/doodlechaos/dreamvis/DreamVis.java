@@ -33,6 +33,7 @@ public class DreamVis implements ModInitializer {
 	public enum CamMode {UnityKeyframes, MCRegular}
 	public static CamMode CurrCamMode = CamMode.MCRegular;
 
+	public static String PrevChatMessage = "";
 
 	@Override
 	public void onInitialize() {
@@ -42,7 +43,6 @@ public class DreamVis implements ModInitializer {
 		KeyboardInputs = new KeyboardInputs();
 		RegisterCommands();
 		RegisterEvents();
-
 	}
 
 	private void RegisterCommands(){
@@ -55,6 +55,7 @@ public class DreamVis implements ModInitializer {
 			SetProjectNameCommand.register(dispatcher);
 			FOVCommand.register(dispatcher);
 			SocketCommand.register(dispatcher);
+			RecPrevMsgCommand.register(dispatcher);
 		});
 	}
 
@@ -63,6 +64,14 @@ public class DreamVis implements ModInitializer {
 		ServerLifecycleEvents.SERVER_STOPPED.register(this::onServerStopped);
 		ClientTickEvents.END_CLIENT_TICK.register(this::onEndClientTick);
 	}
+
+	public static void OnPlayerSendChatMessage(String msgInWorldCoords){
+		if(msgInWorldCoords.startsWith("/recPrevMsg"))
+			return;
+
+		PrevChatMessage = msgInWorldCoords;
+	}
+
 
 
 	private void onEndClientTick(MinecraftClient minecraftClient) {
@@ -78,5 +87,7 @@ public class DreamVis implements ModInitializer {
 	private void onServerStopped(MinecraftServer server){
 		MyConfig.SaveToFile();
 	}
+
+
 
 }

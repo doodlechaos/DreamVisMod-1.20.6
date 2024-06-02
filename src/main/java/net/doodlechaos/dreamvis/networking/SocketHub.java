@@ -90,10 +90,17 @@ public class SocketHub {
 
     public void OnUnityMessageReceived(WebSocket conn, String msg, boolean blocking){
         LOGGER.info("RECEIVED MESSAGE FROM UNITY: " + msg);
-        if(CurrCamMode == CamMode.MCRegular && msg.startsWith("ctp"))
+        if(CurrCamMode == CamMode.MCRegular && msg.startsWith("ctp")){
+            conn.send("Camera mode in minecraft isn't set to unity keyframes. Ignoring Messaget");
+            return;
+        }
+        String command = msg;
+        if(command.startsWith("/")) //The execute input doesn't take in a slash at the start of the command
+            command = command.substring(1);
+        else
             return;
 
-        ExecuteCommandAsPlayer(conn, msg, blocking);
+        ExecuteCommandAsPlayer(conn, command, blocking);
     }
 
 
