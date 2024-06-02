@@ -1,7 +1,9 @@
-package net.doodlechaos.dreamvis.mixin;
+package net.doodlechaos.dreamvis.mixin.hud;
 
+import net.doodlechaos.dreamvis.CameraController;
 import net.doodlechaos.dreamvis.DreamVis;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ChatScreen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -12,6 +14,13 @@ import java.text.MessageFormat;
 
 @Mixin(ChatScreen.class)
 public class ChatScreenMixin {
+
+    @Inject(method = "render", at = @At("HEAD"), cancellable = true)
+    public void render(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+        if (CameraController.IsHudHidden()) {
+            ci.cancel();
+        }
+    }
 
     @Inject(method = "sendMessage(Ljava/lang/String;Z)V", at = @At("TAIL"))
     private void onSendMessage(String chatText, boolean addToHistory, CallbackInfo ci) {
@@ -29,7 +38,6 @@ public class ChatScreenMixin {
 
         DreamVis.OnPlayerSendChatMessage(processedMsg);
     }
-
 
     private static String convertTildeCoordinates(String msg, boolean roundRelativeCoordsToInt, MinecraftClient client) {
         if (client.player == null) return msg;

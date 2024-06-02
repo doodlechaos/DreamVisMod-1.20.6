@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import net.doodlechaos.dreamvis.CameraController;
 import net.doodlechaos.dreamvis.DreamVis;
 import net.doodlechaos.dreamvis.config.MyConfig;
 import net.minecraft.client.MinecraftClient;
@@ -22,7 +23,7 @@ public class FOVCommand {
                 .executes(ctx -> {
                     // If no argument is provided, print the current directoryPath
                     ServerCommandSource source = ctx.getSource();
-                    source.sendFeedback(() -> Text.literal("Current FOV: " + DreamVis.MyFOV), false);
+                    source.sendFeedback(() -> Text.literal("Current FOV: " + CameraController.MyFOV), false);
                     return 1;
                 })
                 .then(argument("value", DoubleArgumentType.doubleArg())
@@ -30,7 +31,7 @@ public class FOVCommand {
 
                                 double fov = DoubleArgumentType.getDouble(ctx, "value");
 
-                                DreamVis.MyFOV = fov;
+                                CameraController.MyFOV = fov;
 
                                 return 1;
                         })));

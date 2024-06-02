@@ -134,19 +134,10 @@ public class KeyboardInputs {
         if(player == null)
             return;
 
-        int nextOrdinal = (CurrCamMode.ordinal() + 1) % CurrCamMode.values().length;
-        CurrCamMode = CurrCamMode.values()[nextOrdinal];
+        int nextOrdinal = (CameraController.GetCamMode().ordinal() + 1) % CameraController.CamMode.values().length;
+        CameraController.SetCamMode(CameraController.CamMode.values()[nextOrdinal]);
 
-        if(CurrCamMode == CamMode.UnityKeyframes){
-            player.changeGameMode(GameMode.SPECTATOR);
-
-            // Enable flying
-            player.getAbilities().flying = true;
-            player.getAbilities().allowFlying = true;
-            player.sendAbilitiesUpdate();
-        }
-
-        MinecraftClient.getInstance().player.sendMessage(Text.literal("Camera mode set to: " + CurrCamMode), false);
+        MinecraftClient.getInstance().player.sendMessage(Text.literal("Camera mode set to: " + CameraController.GetCamMode()), false);
     }
 
     private void onPKeyPress() {
@@ -169,7 +160,7 @@ public class KeyboardInputs {
 
         float pitch = client.player.getPitch(); // Rotation around the x-axis
         float yaw = client.player.getYaw(); // Rotation around the y-axis
-        float roll = DreamVis.RollDegrees; // Rotation around the z-axis, typically not used in Minecraft
+        float roll = CameraController.RollDegrees; // Rotation around the z-axis, typically not used in Minecraft
         return new Vec3d(pitch, yaw, roll);
     }
 }

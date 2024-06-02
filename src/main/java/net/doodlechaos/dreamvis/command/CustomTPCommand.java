@@ -2,12 +2,12 @@ package net.doodlechaos.dreamvis.command;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.FloatArgumentType;
+import net.doodlechaos.dreamvis.CameraController;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 //import net.minecraft.util.math.Vec3f;
 
 import static net.doodlechaos.dreamvis.DreamVis.LOGGER;
-import static net.doodlechaos.dreamvis.DreamVis.RollDegrees;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 public class CustomTPCommand {
@@ -33,7 +33,7 @@ public class CustomTPCommand {
 
                                                                         player.teleport(source.getWorld(), xpos, ypos, zpos, yrot, xrot);
 
-                                                                        RollDegrees = zrot;
+                                                                        CameraController.RollDegrees = zrot;
 
                                                                         LOGGER.info("Finished ctp");
 

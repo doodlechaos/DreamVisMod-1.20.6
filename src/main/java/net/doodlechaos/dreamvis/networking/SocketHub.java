@@ -1,32 +1,20 @@
 package net.doodlechaos.dreamvis.networking;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.ParseResults;
-import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.context.CommandContextBuilder;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.doodlechaos.dreamvis.CameraController;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.Vec2f;
 import org.java_websocket.WebSocket;
-import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.handshake.ServerHandshake;
 
-import java.lang.reflect.Field;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.UUID;
-import java.util.Vector;
+
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 import static net.doodlechaos.dreamvis.DreamVis.*;
 
@@ -44,7 +32,7 @@ public class SocketHub {
 
     }
 
-    private void InitWebSocketServer(){
+    public void InitWebSocketServer(){
 
         try{
             if(_myWsServer != null){
@@ -90,7 +78,7 @@ public class SocketHub {
 
     public void OnUnityMessageReceived(WebSocket conn, String msg, boolean blocking){
         LOGGER.info("RECEIVED MESSAGE FROM UNITY: " + msg);
-        if(CurrCamMode == CamMode.MCRegular && msg.startsWith("ctp")){
+        if(CameraController.GetCamMode() == CameraController.CamMode.MCRegular && msg.startsWith("/ctp")){
             conn.send("Camera mode in minecraft isn't set to unity keyframes. Ignoring Messaget");
             return;
         }
@@ -166,13 +154,33 @@ public class SocketHub {
             LOGGER.info("client isn't open, reinitializing");
             InitWebSocketClient();
         }
-        LOGGER.info("sending message to unity server: " + msg);
 
-        try{
-            _myWsClient.send(msg);
-        }catch (Exception e){
-            LOGGER.error(e.toString());
-        }
+        // Run the waiting logic asynchronously
+        CompletableFuture.runAsync(() -> {
+            long startTime = System.currentTimeMillis();
+            while (!_myWsClient.isOpen()) {
+                if (System.currentTimeMillis() - startTime > 3000) {
+                    LOGGER.error("Timeout: WebSocket client did not open within 3 seconds.");
+                    return;
+                }
+
+                try {
+                    Thread.sleep(100); // Sleep for a short duration before checking again
+                } catch (InterruptedException e) {
+                    LOGGER.error("Interrupted while waiting for WebSocket client to open: " + e.toString());
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+            }
+
+            LOGGER.info("sending message to unity server: " + msg);
+
+            try {
+                _myWsClient.send(msg);
+            } catch (Exception e) {
+                LOGGER.error(e.toString());
+            }
+        });
 
     }
 }

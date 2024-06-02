@@ -1,5 +1,6 @@
 package net.doodlechaos.dreamvis.mixin;
 
+import net.doodlechaos.dreamvis.CameraController;
 import net.doodlechaos.dreamvis.DreamVis;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
@@ -24,7 +25,7 @@ public class GameRendererMixin {
 
         float pitchRadians = camera.getPitch() * 0.017453292F;
         float yawRadians = camera.getYaw() * 0.017453292F + 3.1415927F;
-        float rollRadians = DreamVis.RollDegrees * 0.017453292F;
+        float rollRadians = CameraController.RollDegrees * 0.017453292F;
 
         // Reset the matrix to identity
         matrix4f2.identity();
@@ -38,6 +39,6 @@ public class GameRendererMixin {
 
     @Inject(at = @At("TAIL"), method = "getFov", cancellable = true)
     private void getFov(Camera camera, float tickDelta, boolean changingFov, CallbackInfoReturnable<Double> cir) {
-        cir.setReturnValue(DreamVis.MyFOV);
+        cir.setReturnValue(CameraController.MyFOV);
     }
 }

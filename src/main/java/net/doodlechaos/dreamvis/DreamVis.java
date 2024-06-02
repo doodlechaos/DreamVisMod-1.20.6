@@ -22,16 +22,8 @@ public class DreamVis implements ModInitializer {
 	public static final int SOCKET_CLIENT_PORT = 54321; // Change this to your desired port
 	public static final String UNITY_ROUTE_NAME = "doodle";
 
-	public static boolean HUD_HIDDEN = false;
-
-	public static float RollDegrees = 0;
-	public static double MyFOV = 70;
-
 	public static SocketHub SocketHub;
 	public static KeyboardInputs KeyboardInputs;
-
-	public enum CamMode {UnityKeyframes, MCRegular}
-	public static CamMode CurrCamMode = CamMode.MCRegular;
 
 	public static String PrevChatMessage = "";
 
@@ -56,6 +48,7 @@ public class DreamVis implements ModInitializer {
 			FOVCommand.register(dispatcher);
 			SocketCommand.register(dispatcher);
 			RecPrevMsgCommand.register(dispatcher);
+			CamModeCommand.register(dispatcher);
 		});
 	}
 
