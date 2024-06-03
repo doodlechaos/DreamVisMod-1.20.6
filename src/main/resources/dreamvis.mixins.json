@@ -3,14 +3,14 @@
 	"package": "net.doodlechaos.dreamvis.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-		"ExampleMixin",
 		"GameRendererMixin",
 		"hud.ChatHudMixin",
 		"hud.InGameHudMixin",
 		"hud.InventoryScreenMixin",
 		"CameraMixin",
 		"hud.ChatScreenMixin",
-		"FrustumMixin"
+		"FrustumMixin",
+		"FrustumIntersectionMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
