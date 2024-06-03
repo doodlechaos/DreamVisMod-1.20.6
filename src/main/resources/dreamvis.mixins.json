@@ -9,7 +9,8 @@
 		"hud.InGameHudMixin",
 		"hud.InventoryScreenMixin",
 		"CameraMixin",
-		"hud.ChatScreenMixin"
+		"hud.ChatScreenMixin",
+		"FrustumMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

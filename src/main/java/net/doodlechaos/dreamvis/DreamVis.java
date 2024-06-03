@@ -49,6 +49,7 @@ public class DreamVis implements ModInitializer {
 			SocketCommand.register(dispatcher);
 			RecPrevMsgCommand.register(dispatcher);
 			CamModeCommand.register(dispatcher);
+			FrustumCullingCommand.register(dispatcher);
 		});
 	}
 

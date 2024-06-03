@@ -23,8 +23,6 @@ public class SocketCommand {
                             ServerCommandSource source = ctx.getSource();
                             source.sendFeedback(() -> Text.literal("Initializing socket server..."), false);
 
-                            // Your logic to restart the server goes here
-
                             return 1;
                         }))
                 .then(argument("msg", StringArgumentType.greedyString())

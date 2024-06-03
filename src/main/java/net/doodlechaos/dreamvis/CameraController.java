@@ -15,6 +15,8 @@ public class CameraController {
     public enum CamMode {UnityKeyframes, MCRegular}
     private static CamMode CurrCamMode = CamMode.MCRegular;
 
+    public static boolean FrustumCulling = true;
+
     public static boolean IsHudHidden() {return HUD_HIDDEN;}
     public static CamMode GetCamMode() {return CurrCamMode;}
 
