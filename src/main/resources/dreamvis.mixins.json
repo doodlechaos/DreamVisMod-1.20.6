@@ -10,7 +10,12 @@
 		"CameraMixin",
 		"hud.ChatScreenMixin",
 		"FrustumMixin",
-		"FrustumIntersectionMixin"
+		"FrustumIntersectionMixin",
+		"ChunkLoading.WorldChunkMixin",
+		"ChunkLoading.WorldRendererMixin",
+		"ChunkLoading.ClientChunkManagerMixin",
+		"ChunkLoading.ChunkBuilderMixin",
+		"ChunkLoading.BuiltChunkMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

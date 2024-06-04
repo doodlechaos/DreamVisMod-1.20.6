@@ -23,7 +23,8 @@ public class SocketHub {
     private static MyWebSocketClient _myWsClient;
     private static MyWebSocketServer _myWsServer;
 
-    public CountDownLatch CountDownLatch;
+    public static CountDownLatch ClientTickLatch;
+    public static CountDownLatch ServerTickLatch;
 
     public SocketHub(){
 
@@ -109,7 +110,8 @@ public class SocketHub {
             conn.send("Minecraft server is not available."); //Ack
             return;
         }
-        CountDownLatch = new CountDownLatch(5);
+
+        ResetLatch();
 
         minecraftServer.execute(() -> {
             try {
@@ -136,7 +138,8 @@ public class SocketHub {
         //TODO: Wait for CountDownLatch, or timeout after 10 seconds
         if(blocking){
             try{
-                boolean completed = CountDownLatch.await(10, TimeUnit.SECONDS);
+                boolean completed = ClientTickLatch.await(10, TimeUnit.SECONDS);
+                boolean doneServer = ServerTickLatch.await(10, TimeUnit.SECONDS);
                 conn.send("Latch completed"); //Ack
 
             } catch (Exception e){
@@ -182,5 +185,10 @@ public class SocketHub {
             }
         });
 
+    }
+
+    public static void ResetLatch(){
+        ClientTickLatch = new CountDownLatch(5);
+        ServerTickLatch = new CountDownLatch(5);
     }
 }
