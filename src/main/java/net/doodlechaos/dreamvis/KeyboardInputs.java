@@ -145,19 +145,21 @@ public class KeyboardInputs {
         if(SocketHub == null)
             return;
 
-        if(withShift)
+        CameraController.RollDegrees += (float) ((withShift) ? 3.5 : 0.6);
+/*        if(withShift)
             SocketHub.SendMsgToUnity("KEYPRESS=q+shift");
         else
-            SocketHub.SendMsgToUnity("KEYPRESS=q");
+            SocketHub.SendMsgToUnity("KEYPRESS=q");*/
     }
 
     private static void onEKeyHeld(boolean withShift){
         LOGGER.info("E KEY DETECTED");
+        CameraController.RollDegrees -= (float) ((withShift) ? 3.5 : 0.6);
 
-        if(withShift)
+/*        if(withShift)
             SocketHub.SendMsgToUnity("KEYPRESS=e+shift");
         else
-            SocketHub.SendMsgToUnity("KEYPRESS=e");
+            SocketHub.SendMsgToUnity("KEYPRESS=e");*/
     }
 
     public static void togglePlayerInventory() {
