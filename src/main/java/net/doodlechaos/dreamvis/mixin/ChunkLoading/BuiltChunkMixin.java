@@ -13,7 +13,7 @@ public class BuiltChunkMixin {
 
     @Inject(method = "<init>", at = @At("TAIL")) //This never stop polling
     private void onUpload(CallbackInfo ci) {
-        LOGGER.info("Inside constructor of built chunk");
+        //LOGGER.info("Inside constructor of built chunk");
 
     }
 

@@ -41,6 +41,7 @@ public class DreamVis implements ModInitializer {
 	public void onInitialize() {
 		LOGGER.info("Hello Fabric world!");
 		MyConfig.LoadFromFile();
+		SocketHub = new SocketHub();
 
 		KeyboardInputs = new KeyboardInputs();
 		registerCommands();
@@ -129,7 +130,6 @@ public class DreamVis implements ModInitializer {
 
 
 	private void onServerStarted(MinecraftServer server) {
-		SocketHub = new SocketHub();
 	}
 
 	private void onServerStopped(MinecraftServer server){

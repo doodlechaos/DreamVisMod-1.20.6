@@ -15,7 +15,9 @@
 		"ChunkLoading.WorldRendererMixin",
 		"ChunkLoading.ClientChunkManagerMixin",
 		"ChunkLoading.ChunkBuilderMixin",
-		"ChunkLoading.BuiltChunkMixin"
+		"ChunkLoading.BuiltChunkMixin",
+		"KeyBindingMixin",
+		"KeyboardMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
