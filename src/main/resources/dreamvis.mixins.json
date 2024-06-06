@@ -17,7 +17,8 @@
 		"ChunkLoading.ChunkBuilderMixin",
 		"ChunkLoading.BuiltChunkMixin",
 		"KeyBindingMixin",
-		"KeyboardMixin"
+		"KeyboardMixin",
+		"ServerPlayerInteractionManagerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

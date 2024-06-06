@@ -20,7 +20,6 @@ public class FrustumCullingCommand {
                         .executes(ctx -> {
                             try{
 
-                                String camModeName = CameraController.GetCamMode().name();
                                 ctx.getSource().sendFeedback(() -> Text.literal("Frustum Culling is currently: " + ((CameraController.FrustumCulling) ? "enabled" : "disabled")), false);
                                 return 1;
 

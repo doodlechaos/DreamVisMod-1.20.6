@@ -2,10 +2,12 @@ package net.doodlechaos.dreamvis.networking;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.doodlechaos.dreamvis.CameraController;
+import net.doodlechaos.dreamvis.DreamVis;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.world.GameMode;
 import org.java_websocket.WebSocket;
 
 import java.net.URI;
@@ -79,31 +81,36 @@ public class SocketHub {
 
     public void OnUnityMessageReceived(WebSocket conn, String msg, boolean blocking){
         LOGGER.info("RECEIVED MESSAGE FROM UNITY: " + msg);
-        if(CameraController.GetCamMode() == CameraController.CamMode.MCRegular && msg.startsWith("/ctp")){
-            conn.send("Camera mode in minecraft isn't set to unity keyframes. Ignoring Messaget");
-            return;
-        }
+
         String command = msg;
         if(command.startsWith("/")) //The execute input doesn't take in a slash at the start of the command
             command = command.substring(1);
-        else
+
+        if(command.startsWith("ctp")){
+            HandleCustomTeleport(conn, command, blocking);
             return;
+        }
 
         ExecuteCommandAsPlayer(conn, command, blocking);
+    }
+
+    private void HandleCustomTeleport(WebSocket conn, String msg, boolean blocking){
+        CameraController.LatestCTP = msg;
+        var player = DreamVis.GetServerPlayer();
+        if(player == null)
+            return;
+
+        if(player.interactionManager.getGameMode() != GameMode.SPECTATOR){
+            conn.send("Not in spectator mode, ignoring Custom TP");
+            return;
+        }
+        ExecuteCommandAsPlayer(conn, msg, blocking);
     }
 
 
     //TODO: move this to somewhere else?
     private void ExecuteCommandAsPlayer(WebSocket conn, String command, boolean blocking){
         IntegratedServer minecraftServer = MinecraftClient.getInstance().getServer();
-        List<ServerPlayerEntity> playerList = minecraftServer.getPlayerManager().getPlayerList();
-        if (playerList.isEmpty()){
-            LOGGER.error("Player list is empty");
-            conn.send("Player list is empty"); //Ack
-            return;
-        }
-
-        ServerPlayerEntity player = minecraftServer.getPlayerManager().getPlayerList().get(0);
 
         if (minecraftServer == null) {
             LOGGER.error("Minecraft server is not available.");
@@ -115,7 +122,8 @@ public class SocketHub {
 
         minecraftServer.execute(() -> {
             try {
-                // Get the nearest player to the server's default position
+                var player = DreamVis.GetServerPlayer();
+
                 if (player == null) {
                     LOGGER.error("No players are currently online.");
                     conn.send("No players are currently online."); //Ack
@@ -135,11 +143,11 @@ public class SocketHub {
             }
         });
 
-        //TODO: Wait for CountDownLatch, or timeout after 10 seconds
+        //Wait for CountDownLatch, or timeout after 10 seconds
         if(blocking){
             try{
-                boolean completed = ClientTickLatch.await(10, TimeUnit.SECONDS);
-                boolean doneServer = ServerTickLatch.await(10, TimeUnit.SECONDS);
+                ClientTickLatch.await(10, TimeUnit.SECONDS);
+                ServerTickLatch.await(10, TimeUnit.SECONDS);
                 conn.send("Latch completed"); //Ack
 
             } catch (Exception e){
@@ -148,8 +156,36 @@ public class SocketHub {
         } else{
             conn.send("Ack non-blocking command");
         }
+    }
 
+    public static void ExecuteCommandAsPlayer(String command){
+        IntegratedServer minecraftServer = MinecraftClient.getInstance().getServer();
+        if (minecraftServer == null) {
+            LOGGER.error("Minecraft server is not available.");
+            return;
+        }
 
+        ServerPlayerEntity player = DreamVis.GetServerPlayer();
+        if (player == null) {
+            LOGGER.error("No players are currently online.");
+            return;
+        }
+
+        minecraftServer.execute(() -> {
+            try {
+                // Set up a CountDownLatch to wait for the command completion
+                CommandDispatcher<ServerCommandSource> dispatcher = minecraftServer.getCommandManager().getDispatcher();
+
+                var parsedCommand = dispatcher.parse(command, player.getCommandSource());
+
+                dispatcher.execute(parsedCommand);
+
+                LOGGER.info("Command executed successfully");
+
+            } catch (Exception e) {
+                LOGGER.error("Failed to execute command [" + command + "]: " + e.toString());
+            }
+        });
     }
 
     public void SendMsgToUnity(String msg){

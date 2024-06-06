@@ -16,7 +16,10 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.server.MinecraftServer;
 
+import net.minecraft.server.integrated.IntegratedServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.world.GameMode;
 import net.minecraft.world.chunk.WorldChunk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +39,7 @@ public class DreamVis implements ModInitializer {
 	private static long _lastChunkLoadTime = 0;
 
 	private int _prevTickCompletedChunkCount = 0;
+
 
 	@Override
 	public void onInitialize() {
@@ -59,7 +63,7 @@ public class DreamVis implements ModInitializer {
 			FOVCommand.register(dispatcher);
 			SocketCommand.register(dispatcher);
 			RecPrevMsgCommand.register(dispatcher);
-			CamModeCommand.register(dispatcher);
+			//CamModeCommand.register(dispatcher);
 			FrustumCullingCommand.register(dispatcher);
 		});
 	}
@@ -72,6 +76,7 @@ public class DreamVis implements ModInitializer {
 		ServerTickEvents.END_SERVER_TICK.register(this::onEndServerTick);
 		ClientChunkEvents.CHUNK_LOAD.register(this::onClientChunkLoad);
 		ServerChunkEvents.CHUNK_LOAD.register(this::onServerChunkLoad);
+
 	}
 
 	private void onServerChunkLoad(ServerWorld serverWorld, WorldChunk worldChunk) {
@@ -146,4 +151,42 @@ public class DreamVis implements ModInitializer {
 		return false;
 	}
 
+	public static ServerPlayerEntity GetServerPlayer(){
+		IntegratedServer minecraftServer = MinecraftClient.getInstance().getServer();
+		if (minecraftServer == null) {
+			LOGGER.error("Minecraft server is not available.");
+			return null;
+		}
+
+		var playerList = minecraftServer.getPlayerManager().getPlayerList();
+
+		if(playerList.isEmpty())
+			return null;
+
+		return playerList.get(0);
+	}
+
+	public static void OnGameModeChange(GameMode prevGameMode, GameMode newGameMode){
+		LOGGER.info("SETTING GAME MODE TO: " + newGameMode.asString());
+		var player = GetServerPlayer();
+
+		if(player == null)
+			return;
+
+		if(newGameMode == GameMode.SPECTATOR){
+			// Enable flying
+			player.getAbilities().flying = true;
+			player.getAbilities().allowFlying = true;
+			player.sendAbilitiesUpdate();
+			LOGGER.info("Set cam mode to unity keyframes");
+
+			//Snap to the correct playhead position
+			CameraController.SnapToPlayheadKeyframe();
+		}
+
+		if(newGameMode == GameMode.CREATIVE){
+			CameraController.RollDegrees = 0;
+
+		}
+	}
 }

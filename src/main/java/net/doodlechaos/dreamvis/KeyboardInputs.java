@@ -4,8 +4,8 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
-import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.GameMode;
 
 import java.text.MessageFormat;
 
@@ -42,11 +42,15 @@ public class KeyboardInputs {
         else if(code.equals("key.keyboard.q"))
             qIsPressed = pressed;
         else if(code.equals("key.keyboard.e")){
-            if(CameraController.GetCamMode() != CameraController.CamMode.UnityKeyframes && pressed){
-                togglePlayerInventory();
-                return;
+            var currScreen = MinecraftClient.getInstance().currentScreen;
+            if(GetServerPlayer().interactionManager.getGameMode() != GameMode.SPECTATOR
+                    && pressed
+                    && (currScreen == null || currScreen instanceof InventoryScreen || currScreen instanceof CreativeInventoryScreen)){
+                        togglePlayerInventory();
+                        return;
             }
-            eIsPressed = pressed;
+            if(currScreen == null)
+                eIsPressed = pressed;
         }
         else if(code.equals("key.keyboard.k") && pressed)
             onKKeyPress();
@@ -58,6 +62,8 @@ public class KeyboardInputs {
             rightIsPressed = pressed;
         else if(code.equals("key.keyboard.left.control"))
             leftCtrlIsPressed = pressed;
+        else if(code.equals("key.keyboard.down") && pressed)
+            CameraController.SnapToPlayheadKeyframe();
     }
 
     private void onClientEndTick(MinecraftClient minecraftClient) {
@@ -102,7 +108,7 @@ public class KeyboardInputs {
     }
 
     private static void onCKeyPress() {
-        LOGGER.info("C KEY DETECTED");
+/*        LOGGER.info("C KEY DETECTED");
         var playerList = MinecraftClient.getInstance().getServer().getPlayerManager().getPlayerList();
 
         var player = playerList.getFirst();
@@ -110,10 +116,10 @@ public class KeyboardInputs {
         if(player == null)
             return;
 
-        int nextOrdinal = (CameraController.GetCamMode().ordinal() + 1) % CameraController.CamMode.values().length;
-        CameraController.SetCamMode(CameraController.CamMode.values()[nextOrdinal]);
+        int nextOrdinal = (CameraController.GetCamMode().ordinal() + 1) % CameraController.SpectatorCamMode.values().length;
+        CameraController.SetCamMode(CameraController.SpectatorCamMode.values()[nextOrdinal]);
 
-        MinecraftClient.getInstance().player.sendMessage(Text.literal("Camera mode set to: " + CameraController.GetCamMode()), false);
+        MinecraftClient.getInstance().player.sendMessage(Text.literal("Camera mode set to: " + CameraController.GetCamMode()), false);*/
     }
 
     private static void onPKeyPress() {
@@ -146,20 +152,11 @@ public class KeyboardInputs {
             return;
 
         CameraController.RollDegrees += (float) ((withShift) ? 3.5 : 0.6);
-/*        if(withShift)
-            SocketHub.SendMsgToUnity("KEYPRESS=q+shift");
-        else
-            SocketHub.SendMsgToUnity("KEYPRESS=q");*/
     }
 
     private static void onEKeyHeld(boolean withShift){
         LOGGER.info("E KEY DETECTED");
         CameraController.RollDegrees -= (float) ((withShift) ? 3.5 : 0.6);
-
-/*        if(withShift)
-            SocketHub.SendMsgToUnity("KEYPRESS=e+shift");
-        else
-            SocketHub.SendMsgToUnity("KEYPRESS=e");*/
     }
 
     public static void togglePlayerInventory() {
