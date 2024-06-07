@@ -11,11 +11,6 @@
 		"hud.ChatScreenMixin",
 		"FrustumMixin",
 		"FrustumIntersectionMixin",
-		"ChunkLoading.WorldChunkMixin",
-		"ChunkLoading.WorldRendererMixin",
-		"ChunkLoading.ClientChunkManagerMixin",
-		"ChunkLoading.ChunkBuilderMixin",
-		"ChunkLoading.BuiltChunkMixin",
 		"KeyBindingMixin",
 		"KeyboardMixin",
 		"ServerPlayerInteractionManagerMixin"

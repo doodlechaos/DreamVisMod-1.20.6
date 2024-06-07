@@ -16,9 +16,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
-import static net.doodlechaos.dreamvis.DreamVis.LOGGER;
 
-import static net.doodlechaos.dreamvis.DreamVis.LOGGER;
+import static net.doodlechaos.dreamvis.DreamVis.*;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.server.command.CommandManager.literal;
 
@@ -42,7 +41,10 @@ public class ScreenshotCommand {
 
     private static void ensureLoadThenScreenshot(int frameNum) {
         ensureChunksLoaded()
-                .thenRun(() -> saveScreenshot(frameNum))
+                .thenRun(() -> {
+                    saveScreenshot(frameNum);
+                    ScreenshotDoneFlag = true;
+                })
                 .exceptionally(e -> {
                     LOGGER.error("Error waiting for chunks to load", e);
                     return null;

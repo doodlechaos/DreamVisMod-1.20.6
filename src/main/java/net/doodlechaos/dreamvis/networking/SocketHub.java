@@ -119,6 +119,9 @@ public class SocketHub {
         }
 
         ResetLatch();
+        if(command.startsWith("screenshot")) {
+            ScreenshotDoneFlag = false;
+        }
 
         minecraftServer.execute(() -> {
             try {
@@ -145,6 +148,11 @@ public class SocketHub {
 
         //Wait for CountDownLatch, or timeout after 10 seconds
         if(blocking){
+            if(command.startsWith("screenshot")){
+                HandleScreenshotAck(conn); //Screenshots wait for world to load, so we must use a different method instead of the latches
+                return;
+            }
+
             try{
                 ClientTickLatch.await(10, TimeUnit.SECONDS);
                 ServerTickLatch.await(10, TimeUnit.SECONDS);
@@ -156,6 +164,27 @@ public class SocketHub {
         } else{
             conn.send("Ack non-blocking command");
         }
+    }
+
+    private static void HandleScreenshotAck(WebSocket conn){
+        new Thread(() -> {
+            float waitTime = 0;
+            while (!DreamVis.ScreenshotDoneFlag && waitTime < 10) {
+                try {
+                    Thread.sleep(100); // Sleep for 100ms
+                    waitTime += 0.1f;
+                } catch (InterruptedException e) {
+                    LOGGER.error("Thread interrupted while waiting for screenshot completion: " + e.toString());
+                    break;
+                }
+            }
+
+            if (ScreenshotDoneFlag) {
+                conn.send("Screenshot command completed"); // Acknowledgement
+            } else {
+                conn.send("Screenshot command timed out"); // Acknowledgement
+            }
+        }).start();
     }
 
     public static void ExecuteCommandAsPlayer(String command){

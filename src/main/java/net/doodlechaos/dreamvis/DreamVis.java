@@ -40,6 +40,7 @@ public class DreamVis implements ModInitializer {
 
 	private int _prevTickCompletedChunkCount = 0;
 
+	public static boolean ScreenshotDoneFlag = false;
 
 	@Override
 	public void onInitialize() {
@@ -63,7 +64,6 @@ public class DreamVis implements ModInitializer {
 			FOVCommand.register(dispatcher);
 			SocketCommand.register(dispatcher);
 			RecPrevMsgCommand.register(dispatcher);
-			//CamModeCommand.register(dispatcher);
 			FrustumCullingCommand.register(dispatcher);
 		});
 	}
@@ -87,8 +87,6 @@ public class DreamVis implements ModInitializer {
 	private void onClientChunkLoad(ClientWorld clientWorld, WorldChunk worldChunk) {
 		_lastChunkLoadTime = System.currentTimeMillis();
 		//LOGGER.info("Detected client chunk load: " );
-
-
 	}
 
 
@@ -147,7 +145,7 @@ public class DreamVis implements ModInitializer {
 				&& MinecraftClient.getInstance().worldRenderer.isTerrainRenderComplete()){ //If no chunks were loaded in the last second, assume we are done
 			return true;
 		}
-		LOGGER.info("waiting for chunks to load, timeSinceLastChunkJob: " + timeSinceLastChunkJob);
+		//LOGGER.info("waiting for chunks to load, timeSinceLastChunkJob: " + timeSinceLastChunkJob);
 		return false;
 	}
 
