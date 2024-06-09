@@ -37,13 +37,18 @@ public class KeyboardInputs {
     //Sets instantly every frame the key is held down
     public static void OnKeyAction(String code, boolean pressed){
 
-        if(code.equals("key.keyboard.c") && pressed)
-            onCKeyPress();
-        else if(code.equals("key.keyboard.q"))
+        //if(code.equals("key.keyboard.c") && pressed)
+        //    onCKeyPress();
+        if(code.equals("key.keyboard.q"))
             qIsPressed = pressed;
         else if(code.equals("key.keyboard.e")){
             var currScreen = MinecraftClient.getInstance().currentScreen;
-            if(GetServerPlayer().interactionManager.getGameMode() != GameMode.SPECTATOR
+            var player = GetServerPlayer();
+
+            if(player == null)
+                return;
+
+            if(player.interactionManager.getGameMode() != GameMode.SPECTATOR
                     && pressed
                     && (currScreen == null || currScreen instanceof InventoryScreen || currScreen instanceof CreativeInventoryScreen)){
                         togglePlayerInventory();
@@ -84,11 +89,12 @@ public class KeyboardInputs {
 
 
     private static void onKKeyPress() {
-        LOGGER.info("K KEY DETECTED");
+        return; //TODO
+/*        LOGGER.info("K KEY DETECTED");
         Vec3d playerPos = getPlayerPos();
         Vec3d playerRot = getPlayerEulerAngles();
         String message = MessageFormat.format("KEYPRESS=k {0} {1} {2} {3} {4} {5}", playerPos.x, playerPos.y, playerPos.z, playerRot.x, playerRot.y, playerRot.z);
-        SocketHub.SendMsgToUnity(message);
+        SocketHub.SendMsgToUnity(message);*/
     }
 
     private static void onLeftKeyHeld(boolean withShift) {
@@ -105,21 +111,6 @@ public class KeyboardInputs {
             SocketHub.SendMsgToUnity("KEYPRESS=right+shift");
         else
             SocketHub.SendMsgToUnity("KEYPRESS=right");
-    }
-
-    private static void onCKeyPress() {
-/*        LOGGER.info("C KEY DETECTED");
-        var playerList = MinecraftClient.getInstance().getServer().getPlayerManager().getPlayerList();
-
-        var player = playerList.getFirst();
-
-        if(player == null)
-            return;
-
-        int nextOrdinal = (CameraController.GetCamMode().ordinal() + 1) % CameraController.SpectatorCamMode.values().length;
-        CameraController.SetCamMode(CameraController.SpectatorCamMode.values()[nextOrdinal]);
-
-        MinecraftClient.getInstance().player.sendMessage(Text.literal("Camera mode set to: " + CameraController.GetCamMode()), false);*/
     }
 
     private static void onPKeyPress() {
