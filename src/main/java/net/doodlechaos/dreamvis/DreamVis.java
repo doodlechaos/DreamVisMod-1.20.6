@@ -2,6 +2,7 @@ package net.doodlechaos.dreamvis;
 
 import net.doodlechaos.dreamvis.command.*;
 import net.doodlechaos.dreamvis.config.MyConfig;
+import net.doodlechaos.dreamvis.events.RightClickListener;
 import net.doodlechaos.dreamvis.networking.SocketHub;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
@@ -77,6 +78,7 @@ public class DreamVis implements ModInitializer {
 		ClientChunkEvents.CHUNK_LOAD.register(this::onClientChunkLoad);
 		ServerChunkEvents.CHUNK_LOAD.register(this::onServerChunkLoad);
 
+		RightClickListener.register();
 	}
 
 	private void onServerChunkLoad(ServerWorld serverWorld, WorldChunk worldChunk) {

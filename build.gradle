@@ -34,6 +34,8 @@ dependencies {
 	// Added by mark
 	implementation 'org.java-websocket:Java-WebSocket:1.5.6'
 
+	// Include java_websocket in the final JAR
+	include 'org.java-websocket:Java-WebSocket:1.5.6'
 }
 
 processResources {

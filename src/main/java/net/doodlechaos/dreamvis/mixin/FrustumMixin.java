@@ -1,4 +1,4 @@
-package net.doodlechaos.dreamvis.mixin;
+//package net.doodlechaos.dreamvis.mixin;
 
 import net.doodlechaos.dreamvis.CameraController;
 import net.fabricmc.fabric.mixin.rendering.data.client.ChunkRendererRegionMixin;
@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 //WARNING: THIS IS OVERWRITTEN BY SODIUM
-@Mixin(Frustum.class)
+/*@Mixin(Frustum.class)
 public class FrustumMixin {
     @Inject(method = "isVisible*", at = @At("HEAD"), cancellable = true)
     public void isVisible(double minX, double minY, double minZ, double maxX, double maxY, double maxZ, CallbackInfoReturnable<Boolean> cir) {
@@ -18,4 +18,4 @@ public class FrustumMixin {
         }
         cir.setReturnValue(true);
     }
-}
+}*/

@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
 
@@ -39,6 +40,8 @@ public class KeyboardInputs {
 
         //if(code.equals("key.keyboard.c") && pressed)
         //    onCKeyPress();
+        if(code.equals("key.keyboard.r") && pressed)
+            onRKeyPress();
         if(code.equals("key.keyboard.q"))
             qIsPressed = pressed;
         else if(code.equals("key.keyboard.e")){
@@ -95,6 +98,15 @@ public class KeyboardInputs {
         Vec3d playerRot = getPlayerEulerAngles();
         String message = MessageFormat.format("KEYPRESS=k {0} {1} {2} {3} {4} {5}", playerPos.x, playerPos.y, playerPos.z, playerRot.x, playerRot.y, playerRot.z);
         SocketHub.SendMsgToUnity(message);*/
+    }
+
+    public static void onRKeyPress(){
+        DreamVis.SocketHub.SendMsgToUnity("Marker=" + DreamVis.PrevChatMessage);
+        var player = DreamVis.GetServerPlayer();
+        if(player == null)
+            return;
+
+        player.sendMessage(Text.of("Created marker in unity for: " + PrevChatMessage));
     }
 
     private static void onLeftKeyHeld(boolean withShift) {

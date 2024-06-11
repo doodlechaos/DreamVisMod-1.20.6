@@ -9,7 +9,6 @@
 		"hud.InventoryScreenMixin",
 		"CameraMixin",
 		"hud.ChatScreenMixin",
-		"FrustumMixin",
 		"FrustumIntersectionMixin",
 		"KeyBindingMixin",
 		"KeyboardMixin",
